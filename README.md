@@ -1,4 +1,4 @@
-# Coupon Distribution Web App (MERN Stack)
+# Coupon Distribution Web App
 
 ## 🚀 Overview
 This is a **MERN stack** web application for distributing coupons in a **round-robin** manner. Users can claim coupons **without logging in**, while the admin can **manage coupons, track claims, and toggle availability** via an admin panel.
