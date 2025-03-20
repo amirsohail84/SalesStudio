@@ -7,10 +7,10 @@ const router = express.Router();
 // Middleware to prevent multiple claims
 const checkAbuse = async (req, res, next) => {
   try {
-    const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;;
+    const ip = req.ip;
     const cookieId = req.cookies.couponClaim || req.headers["user-agent"] || Math.random().toString(36).substring(7);
 
-    const existingClaim = await Claim.findOne({ $or: [{ ip }] });
+    const existingClaim = await Claim.findOne({ $or: [{ ip }, { cookieId }] });
     if (existingClaim) return res.status(429).json({ message: "You have already claimed a coupon." });
 
     req.userData = { ip, cookieId };
@@ -32,9 +32,9 @@ router.post("/claim", checkAbuse, async (req, res) => {
     if (!coupon) return res.status(404).json({ message: "No available coupons." });
 
     // Store claim history
-    await Claim.create({ ip: req.userData.ip,couponCode: coupon.code }); //cookieId: req.userData.cookieId, 
+    await Claim.create({ ip: req.userData.ip, cookieId: req.userData.cookieId, couponCode: coupon.code });
 
-    // res.cookie("couponClaim", req.userData.cookieId, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true, sameSite: "none" , secure:true });
+    res.cookie("couponClaim", req.userData.cookieId, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true, sameSite: "none" , secure:true });
     res.json({ message: "Coupon claimed successfully!", coupon: coupon.code });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
