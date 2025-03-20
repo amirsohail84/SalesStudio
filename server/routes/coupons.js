@@ -32,9 +32,9 @@ router.post("/claim", checkAbuse, async (req, res) => {
     if (!coupon) return res.status(404).json({ message: "No available coupons." });
 
     // Store claim history
-    await Claim.create({ ip: req.userData.ip, cookieId: req.userData.cookieId, couponCode: coupon.code });
+    await Claim.create({ ip: req.userData.ip,couponCode: coupon.code }); //cookieId: req.userData.cookieId, 
 
-    res.cookie("couponClaim", req.userData.cookieId, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true, sameSite: "none" , secure:true });
+    // res.cookie("couponClaim", req.userData.cookieId, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true, sameSite: "none" , secure:true });
     res.json({ message: "Coupon claimed successfully!", coupon: coupon.code });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
