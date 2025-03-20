@@ -85,7 +85,3 @@ This project is open-source under the **MIT License**.
 ## 🙌 Contributing
 Feel free to open an **issue** or submit a **pull request**.
 
----
-## ✉️ Contact
-For any queries, contact **your-email@example.com**.
-
