@@ -7,7 +7,7 @@ const router = express.Router();
 // Middleware to prevent multiple claims
 const checkAbuse = async (req, res, next) => {
   try {
-    const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;;
     const cookieId = req.cookies.couponClaim || req.headers["user-agent"] || Math.random().toString(36).substring(7);
 
     const existingClaim = await Claim.findOne({ $or: [{ ip }, { cookieId }] });
@@ -29,22 +29,12 @@ router.post("/claim", checkAbuse, async (req, res) => {
       { new: true }
     );
 
-    if (!coupon)
-      return res.status(404).json({ message: "No available coupons." });
+    if (!coupon) return res.status(404).json({ message: "No available coupons." });
 
     // Store claim history
-    await Claim.create({
-      ip: req.userData.ip,
-      cookieId: req.userData.cookieId,
-      couponCode: coupon.code,
-    });
+    await Claim.create({ ip: req.userData.ip, cookieId: req.userData.cookieId, couponCode: coupon.code });
 
-    res.cookie("couponClaim", req.userData.cookieId, {
-      maxAge: 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite:"None",
-    });
+    res.cookie("couponClaim", req.userData.cookieId, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true, sameSite: "none" , secure:true });
     res.json({ message: "Coupon claimed successfully!", coupon: coupon.code });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
@@ -63,18 +53,16 @@ router.get("/", verifyAdmin, async (req, res) => {
 
 router.post("/add", verifyAdmin, async (req, res) => {
   try {
-    const { code, quantity } = req.body;
+    const { code } = req.body;
 
-    if (!code || quantity <= 0) {
+    if (!code ) {
       return res.status(400).json({ message: "Invalid coupon data" });
     }
 
-    const newCoupon = new Coupon({ code, quantity });
+    const newCoupon = new Coupon({ code});
     await newCoupon.save();
 
-    res
-      .status(201)
-      .json({ message: "Coupon added successfully!", coupon: newCoupon });
+    res.status(201).json({ message: "Coupon added successfully!", coupon: newCoupon });
   } catch (error) {
     res.status(500).json({ message: "Error adding coupon" });
   }
@@ -82,16 +70,15 @@ router.post("/add", verifyAdmin, async (req, res) => {
 
 router.patch("/update/:id", verifyAdmin, async (req, res) => {
   try {
-    const { status, quantity } = req.body;
+    const { status} = req.body;
 
     const updatedCoupon = await Coupon.findByIdAndUpdate(
       req.params.id,
-      { status, quantity },
+      { status },
       { new: true }
     );
 
-    if (!updatedCoupon)
-      return res.status(404).json({ message: "Coupon not found" });
+    if (!updatedCoupon) return res.status(404).json({ message: "Coupon not found" });
 
     res.json({ message: "Coupon updated!", coupon: updatedCoupon });
   } catch {
@@ -102,8 +89,7 @@ router.patch("/update/:id", verifyAdmin, async (req, res) => {
 router.delete("/delete/:id", verifyAdmin, async (req, res) => {
   try {
     const deletedCoupon = await Coupon.findByIdAndDelete(req.params.id);
-    if (!deletedCoupon)
-      return res.status(404).json({ message: "Coupon not found" });
+    if (!deletedCoupon) return res.status(404).json({ message: "Coupon not found" });
 
     res.json({ message: "Coupon deleted!" });
   } catch {

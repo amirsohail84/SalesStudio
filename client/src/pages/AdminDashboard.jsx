@@ -9,7 +9,6 @@ const AdminDashboard = () => {
   const [coupons, setCoupons] = useState([]);
   const [claims, setClaims] = useState([]);
   const [newCoupon, setNewCoupon] = useState("");
-  const [newQuantity, setNewQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -86,40 +85,15 @@ const AdminDashboard = () => {
       const token = localStorage.getItem("adminToken");
       await axios.post(
         `${import.meta.env.VITE_BACKEND}/api/coupons/add`,
-        { code: newCoupon, quantity: newQuantity },
+        { code: newCoupon},
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       toast.success("Coupon added successfully!");
       setNewCoupon("");
-      setNewQuantity(1);
       fetchCoupons();
     } catch (error) {
       toast.error("Failed to add coupon!");
-    }
-  };
-
-  const handleQuantityChange = async (e, couponId) => {
-    const newQuantity = parseInt(e.target.value);
-    if (newQuantity < 1) return;
-
-    try {
-      const token = localStorage.getItem("adminToken");
-      await axios.patch(
-        `${import.meta.env.VITE_BACKEND}/api/coupons/update/${couponId}`,
-        { quantity: newQuantity },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setCoupons((prevCoupons) =>
-        prevCoupons.map((coupon) =>
-          coupon._id === couponId ? { ...coupon, quantity: newQuantity } : coupon
-        )
-      );
-
-      toast.success("Quantity updated!");
-    } catch (error) {
-      toast.error("Failed to update quantity!");
     }
   };
 
@@ -147,7 +121,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="p-6 relative h-screen bg-neutral-900">
+    <div className="p-6 relative min-h-screen bg-neutral-900">
       <button
         onClick={handleLogout}
         className="absolute top-6 right-4 px-3 py-2 bg-red-500 text-white rounded-full font-bold flex items-center gap-1 hover:bg-red-600 hover:uppercase"
@@ -166,14 +140,7 @@ const AdminDashboard = () => {
           value={newCoupon}
           onChange={(e) => setNewCoupon(e.target.value)}
         />
-        <input
-          type="number"
-          min="1"
-          placeholder="Qty."
-          className="border md:w-16 p-2 mb-2 sm:mb-0 sm:w-1/4 sm:ml-2 rounded-full"
-          value={newQuantity}
-          onChange={(e) => setNewQuantity(e.target.value)}
-        />
+        
         <button
           className="uppercase font-bold mt-4 sm:mt-0 px-6 py-3 bg-black text-white rounded-full hover:bg-white hover:text-black"
           onClick={handleAddCoupon}
@@ -197,7 +164,7 @@ const AdminDashboard = () => {
                 <tr className="bg-neutral-900 text-white">
                   <th className="border px-4 py-2">Coupon Code</th>
                   <th className="border px-4 py-2">Status</th>
-                  <th className="border px-4 py-2">Qty.</th>
+                  
                   <th className="border px-4 py-2">Delete</th>
                 </tr>
               </thead>
@@ -221,15 +188,7 @@ const AdminDashboard = () => {
                       </button>
                     </td>
 
-                    <td className="border px-4 py-2">
-                      <input
-                        type="number"
-                        min="1"
-                        className="border p-1 w-12 text-center rounded-full"
-                        value={coupon.quantity}
-                        onChange={(e) => handleQuantityChange(e, coupon._id)}
-                      />
-                    </td>
+                    
 
                     <td className="border px-4 py-2">
                       <button

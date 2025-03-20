@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+body{
+  background-color: #171717;
+}
+
+
 @keyframes gradient {
     0% {
       background-position: 0% 50%;
