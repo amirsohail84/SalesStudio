@@ -10,7 +10,7 @@ const checkAbuse = async (req, res, next) => {
     const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;;
     const cookieId = req.cookies.couponClaim || req.headers["user-agent"] || Math.random().toString(36).substring(7);
 
-    const existingClaim = await Claim.findOne({ $or: [{ ip }, { cookieId }] });
+    const existingClaim = await Claim.findOne({ $or: [{ ip }] });
     if (existingClaim) return res.status(429).json({ message: "You have already claimed a coupon." });
 
     req.userData = { ip, cookieId };
