@@ -3,18 +3,20 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const path = require("path");
 const couponRoutes = require("./routes/coupons.js");
 const { router: adminRoutes } = require("./routes/admin.js");
-const claimRoute=require("./routes/claims.js");
-
+const claimRoute = require("./routes/claims.js");
 
 const app = express();
 
-app.use(cors({
-  origin: process.env.FRONTEND, // Allow only your frontend
-  credentials: true, // Allow cookies & authentication headers
-  methods: ["GET", "POST", "PATCH", "DELETE"],
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND, // Allow only your frontend
+    credentials: true, // Allow cookies & authentication headers
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+  })
+);
 
 // Middleware
 app.use(express.json());
@@ -35,6 +37,13 @@ app.get("/", (req, res) => {
 app.use("/api/coupons", couponRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/claims", claimRoute);
+
+app.use(express.static(path.join(__dirname, "../client/build")));
+
+// Catch-all route for React Router. Sends `index.html` for all non-API routes
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../client", "build", "index.html"));
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
